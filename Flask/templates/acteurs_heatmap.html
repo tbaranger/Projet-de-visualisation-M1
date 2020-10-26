@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<script src="https://d3js.org/d3.v6.min.js"></script>
+<style>
+p {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+}
+aside {
+    font-size: small;
+    right: 0;
+    position: absolute;
+    width: 180px;
+}
+body {
+    background: #eef;
+    color: #333;
+    font-family:serif;
+    margin: 1em auto 4em auto;
+    position: relative;
+    width: 960px;
+}
+h1{
+  text-align:center;
+  font-size:300%;
+  color:#007;
+}
+</style>
+</head>
+
+<body>
+  <h1>{{ title }}</h1>
+  <hr>
+  <aside style="margin-top:100px;">
+    <h2 style="text-align:center;">Heatmap</h2>
+    <p>Cette représentation matricielle représente les participations des plus grands acteurs et actrices français(es) à des films communs. Autrement dit, la couleur traduit le fait que deux acteurs ou actrices en ligne et en colonne aient joué ensemble, dans un nombre plus ou moins importants de films.</p>
+    <p>Si la couleur est blanche, alors ils ou elles ne se sont jamais rencontré(e)s. Si elle est foncée, alors ils ou elles ont joué ensemble dans plusieurs films.</p>
+    <p>Passez votre souris sur les cases de la matrice pour connaître le nombre précis de films dans lequel les acteurs ou actrices correspondant(e)s ont joué ensemble.</p>
+    <p>Construit avec <a href="https://d3js.org/"  target='_blank'>d3.js</a>, et (très) inspiré par <a href="https://bost.ocks.org/mike/miserables/" target='_blank'>cet exemple de Mike Bostock</a> sur <i>Les Misérables</i>.</p>
+  </aside>
+  <script>
+
+  var margin = {top: 120, right: 0, bottom: 10, left: 120},
+    width = 720 - margin.left - margin.right,
+    height = 720 - margin.top - margin.bottom;
+
+  var svg = d3.select("body")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+  var actorsX = {{ actors|tojson }};
+  var actorsY = {{ actors|tojson }}.reverse();
+  var myData = {{ data|tojson }};
+
+  // Tri initial par nombre de rencontres
+  actorsX.sort((a, b) => b.count - a.count);
+  actorsY.sort((a, b) => a.count - b.count);
+
+  // Tri alternatif, par ordre alphabétique
+  //actorsX.sort((a, b) => a.name.localeCompare(b.name));
+  //actorsY.sort((a, b) => b.name.localeCompare(a.name));
+
+  var x = d3.scaleBand()
+    .range([0, width])
+    .domain(actorsX.map(d => d.name))
+    .padding(0.05);
+  svg.append("g")
+      .call(d3.axisTop(x))
+    .selectAll("text")
+      .attr("y", 0)
+      .attr("x", 9)
+      .attr("dy", ".35em")
+      .attr("transform", "rotate(-90)")
+      .style("text-anchor", "start");
+
+  var y = d3.scaleBand()
+    .range([height, 0])
+    .domain(actorsY.map(d => d.name))
+    .padding(0.05);
+  svg.append("g")
+    .call(d3.axisLeft(y));
+
+  var myColor = d3.scaleLinear()
+    .range(["white", "#007"])
+    .domain([0,7])
+
+  // create a tooltip
+  var tooltip = d3.select("body")
+    .append("div")
+    .style("opacity", 0)
+    .attr("class", "tooltip")
+    .style("background-color", "white")
+    .style("border", "solid")
+    .style("border-width", "2px")
+    .style("border-radius", "5px")
+    .style("padding", "5px")
+
+  var mouseover = function(d) {
+    tooltip
+      .style("opacity", 1)
+    d3.select(this)
+      .style("stroke", "black")
+      .style("stroke-width", "1px")
+  }
+  var mousemove = function(event, d) {
+    tooltip
+      .html(d.actor1 == d.actor2 ? "Nombre de rencontres entre <b>" + d.actor1 + "</b> et les acteurs/actrices de cette liste : <b>" + d.collaborations + "</b>" : "Nombre de rencontres entre " + "<b>" + d.actor2 + "</b> et <b>" + d.actor1 + "</b>&nbsp;: <b>" + d.collaborations + "</b>")
+      .style("left", (d3.pointer(event)[0]+70) + "px")
+      .style("top", (d3.pointer(event)[1]) + "px")
+  }
+  var mouseleave = function(d) {
+    tooltip
+      .style("opacity", 0)
+    d3.select(this)
+      .style("stroke", "none")
+  }
+
+  svg.selectAll()
+      .data(myData, d => d.actor1 + ':' + d.actor2)
+      .enter()
+      .append("rect")
+      .attr("x", d => x(d.actor1) )
+      .attr("y", d => y(d.actor2) )
+      .attr("width", x.bandwidth() )
+      .attr("height", y.bandwidth() )
+      .style("fill", d => myColor(d.collaborations) )
+    .on("mouseover", mouseover)
+    .on("mousemove", mousemove)
+    .on("mouseleave", mouseleave)
+
+  </script>
+</body>

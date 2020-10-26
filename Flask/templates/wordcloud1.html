@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>{{title}}</title>
+<script type="text/javascript" src="https://d3js.org/d3.v6.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
+<style></style>
+</head>
+<body style="text-align:center; color:white; background-color:firebrick">
+<h1 style="font-family:serif; font-size:300%">{{title}}</h1>
+<hr>
+<div style="color:white" id="chart" class="svg-container"></div>
+<script>
+
+var margin = {top: 20, right: 10, bottom: 10, left: 10},
+    width = 1200 - margin.left - margin.right,
+    height = 600 - margin.top - margin.bottom;
+
+const svg = d3.select("#chart").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+d3.csv("{{url_for('getMarvelData', k=150)}}").then(function(data) {
+	data.forEach(function(d){d.degree = +d.degree});
+
+	var layout = d3.layout.cloud()
+	  .size([width, height])
+	  .words(data.map(function(d) { return {text: d.name, size:d.degree}; }))
+	  .padding(5)        //space between words
+	  .rotate(function() { return ~~(Math.random() * 2) * 90; })
+	  .fontSize(function(d) { return (d.size/40); })
+	  .on("end", draw);
+	layout.start();
+
+	function draw(words) {
+	  svg.append("g")
+	    .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
+	    .selectAll("text")
+	    	.data(words)
+	    .enter().append("text")
+	      .style("font-size", function(d) { return d.size; })
+	      .style("fill", "white")
+	      .attr("text-anchor", "middle")
+	      .style("font-family", "Impact")
+	      .attr("transform", function(d) {
+	        return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+	      })
+	      .text(function(d) { return d.text; });
+	}
+
+});
+
+</script>
+</body>

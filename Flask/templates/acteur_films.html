@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>{{title}}</title>
+<style>
+.link {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+</style>
+<script type="text/javascript" src="https://d3js.org/d3.v6.min.js"></script>
+<script src="https://d3js.org/d3-dispatch.v2.min.js"></script>
+<script src="https://d3js.org/d3-quadtree.v2.min.js"></script>
+<script src="https://d3js.org/d3-timer.v2.min.js"></script>
+<script src="https://d3js.org/d3-force.v2.min.js"></script>
+</head>
+<body style="text-align:center; background-color:#eeeeff">
+  <h1 style="font-family:serif; font-size:400%; color:#007">{{title}}</h1>
+  <hr>
+  <div style="color:white" id="nodelink" class="svg-container"></div>
+  <script>
+    var width = 1200,
+        height = 800;
+
+    const svg = d3.select("#nodelink").append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .append("g");
+
+    graph = {{ graph|tojson }};
+    console.log(graph);
+
+    const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+    const sizeMin = 5;
+    const sizeMax = 15;
+
+    const simulation = d3.forceSimulation(graph.nodes)
+      .force("link",d3.forceLink(graph.links).id(d => d.id))
+      .force("charge", d3.forceManyBody()
+        .strength(d => d.name == '{{acteur}}' ? -40*d.degree : -20*d.degree)
+        .distanceMax(Math.min(width/4, height/4))
+      )
+      .force("center", d3.forceCenter(width / 2, height / 2));
+
+    const link = svg.append("g").selectAll('.link')
+      .data(graph.links)
+      .enter().append("line")
+        .attr("class", "link");
+
+    var node = svg.selectAll(".node")
+      .data(graph.nodes)
+      .enter().append("g")
+        .attr("class", "node")
+        .call(d3.drag()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended)
+        );
+
+
+    node.append("circle")
+      .attr("r", d => sizeNode(d))
+      .attr("stroke", "#fff")
+      .attr("fill", d => color(d))
+
+    node.append("text")
+      .attr("dy", d => -sizeNode(d))
+      .attr("text-anchor", "middle")
+      .attr("font-family", "serif")
+      .attr("font-weight", d => d.name == '{{acteur}}' ? "bold" : "normal")
+      .attr("font-size", d => d.name == '{{acteur}}' ? "30px" : "14px")
+      .text(d => d.name == '{{acteur}}' ? d.name : d.original_title);
+
+    simulation.on("tick", () => {
+      link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+      node
+        .attr("transform", d => "translate(" + d.x + "," + d.y + ")" );
+    });
+
+    function dragstarted(event, d) {
+      if (!event.active) simulation.alphaTarget(0.3).restart();
+      d.fx = d.x;
+      d.fy = d.y;
+    }
+
+    function dragged(event, d) {
+      d.fx = event.x;
+      d.fy = event.y;
+    }
+
+    function dragended(event, d) {
+      if (!event.active) simulation.alphaTarget(0);
+      d.fx = null;
+      d.fy = null;
+    }
+
+    function color (d) {
+      return d.name == '' ? "#443a31" : "#009de0";
+    }
+
+    function sizeNode (d) {
+      var s = sizeMin + Math.min(d.degree, sizeMax);
+      return d.name == '' ? s/2 : s;
+    }
+
+  </script>
+</body>
