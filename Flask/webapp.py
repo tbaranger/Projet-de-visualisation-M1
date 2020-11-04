@@ -94,7 +94,7 @@ def actorsHeatmap(k=40):
         actors[i]['count'] = sum
 
     return render_template("acteurs_heatmap.html",
-        title = "Heatmap des acteurs et actrices français(es) les plus prolifiques",
+        title = "Heatmap des acteurs et actrices francophones les plus prolifiques",
         actors = actors,
         data=data)
 
@@ -157,6 +157,7 @@ def films(acteur="Jean Reno"):
         dict["degree"] = viewMetric[n]
         dict["name"] = name[n]
         dict["original_title"] = original_title[n]
+        dict['date'] = release_date[n]
         nodes.append(dict)
 
     for e in g.getEdges():
