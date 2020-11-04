@@ -28,9 +28,7 @@
       .append("g");
 
     graph = {{ graph|tojson }};
-    console.log(graph);
 
-    const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
     const sizeMin = 5;
     const sizeMax = 15;
 
@@ -69,6 +67,7 @@
       .attr("font-family", "serif")
       .attr("font-weight", d => d.name == '{{acteur}}' ? "bold" : "normal")
       .attr("font-size", d => d.name == '{{acteur}}' ? "30px" : "14px")
+      //.text(d => d.degree > 1 ? d.id : '');
       .text(d => d.name == '{{acteur}}' ? d.name : d.original_title);
 
     simulation.on("tick", () => {
