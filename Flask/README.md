@@ -17,7 +17,7 @@ Sur la base de ce graphe, nous avons construit le résau social des acteurs, qui
 
 À priori, si la machine sur laquelle on se trouve utilise les mêmes normes que Linux pour les chemins de fichier, il ne devrait pas y avoir besoin de modifier les routes dans le fichier webapp.py. En revanche, sous Windows, il est possible qu'elles doivent être modifiées "à la main" dans le fichier webapp.py.
 
-S'il y avait un vrai problème pour lancer le programme, la version la plus récente de l'application est accessble à l'adresse suivante&nbsp;: https://tbaranger.pythonanywhere.com/.
+S'il y avait un vrai problème pour lancer le programme, la version la plus récente de l'application est accessible à l'adresse suivante&nbsp;: https://tbaranger.pythonanywhere.com/.
 
 #### Ce que nous avons fait
 
@@ -43,4 +43,4 @@ Il faudrait créer une page d'accueil pour accéder aux visualisations autrement
 
 Concernant les visualisations déjà existantes, nous aimerions faire quelques additions. Par exemple, nous aimerions que le nom des acteurs s'affichent au survol de la souris sur le graphe nœud-lien. Il est déjà possible dans le code d'afficher seulement le nom des acteurs ayant un degré supérieur à 1, c'est-à-dire les acteurs ayant plus d'un film en commun avec l'acteur principal, mais nous préférons pour l'instant la version plus épurée avec seulement les titres de films en plus du nom de l'acteur principal. Nous aimerions également pouvoir faire en sorte d'avoir accès au graphe nœud-lien entre deux acteurs et leurs films communs lorsque l'on clique sur la case correspondante dans la heatmap.
 
-Une autre visualisation pour laquelle nous n'avons pas eu le temps de travailler, consisterait à visualiser de façon dynamique l'évolution dans le temps des acteurs ayant joué dans le plus de films. Nous avons en tête un diagramme en barre horizontal dans lequel figurerait par ordre décroissant du nombre de films, et qui s'actualiserait de façon automatique selon les années. Voici un exemple de ce que l'on aimerait reproduire&nbsp;: https://observablehq.com/@d3/bar-chart-race.
+Une autre visualisation, sur laquelle nous n'avons pas eu le temps de travailler, consisterait à visualiser de façon dynamique l'évolution dans le temps des acteurs ayant joué dans le plus de films. Nous avons en tête un diagramme en barre horizontal dans lequel figurerait par ordre décroissant du nombre de films, et qui s'actualiserait de façon automatique selon les années. Voici un exemple de ce que l'on aimerait reproduire&nbsp;: https://observablehq.com/@d3/bar-chart-race.
