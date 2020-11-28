@@ -1,39 +1,7 @@
-<!DOCTYPE html>
-<head>
-<meta charset="utf-8">
-<title>Diagramme en barre sur les années</title>
-<script src="https://d3js.org/d3.v6.min.js"></script>
-<style>
-p {
-    display: block;
-    margin-block-start: 1em;
-    margin-block-end: 1em;
-    margin-inline-start: 0px;
-    margin-inline-end: 0px;
-}
-aside {
-    font-size: small;
-    right: 0;
-    position: absolute;
-    width: 180px;
-}
-body {
-    background: #eef;
-    color: #333;
-    font-family:serif;
-    margin: 1em auto 4em auto;
-    position: relative;
-    width: 960px;
-}
-h1{
-  text-align:center;
-  font-size:300%;
-  color:#007;
-}
-</style>
-</head>
+{% extends "structure.html" %}
 
-<body>
+  {% block content %}
+  
   <h1>{{ title }}</h1>
   <hr>
   <aside style="margin-top:30px;">
@@ -42,8 +10,8 @@ h1{
   </aside>
   <script>
 
-  var margin = {top: 30, right: 30, bottom: 30, left: 120},
-    width = 720 - margin.left - margin.right,
+  var margin = {top: 30, right: 60, bottom: 30, left: 120},
+    width = 780 - margin.left - margin.right,
     height = 720 - margin.top - margin.bottom;
 
   var svg = d3.select("body")
@@ -122,4 +90,5 @@ h1{
   
 
   </script>
-</body>
+
+  {% endblock %}
