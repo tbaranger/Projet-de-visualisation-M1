@@ -1,38 +1,7 @@
-<!DOCTYPE html>
-<head>
-<meta charset="utf-8">
-<script src="https://d3js.org/d3.v6.min.js"></script>
-<style>
-p {
-    display: block;
-    margin-block-start: 1em;
-    margin-block-end: 1em;
-    margin-inline-start: 0px;
-    margin-inline-end: 0px;
-}
-aside {
-    font-size: small;
-    right: 0;
-    position: absolute;
-    width: 180px;
-}
-body {
-    background: #eef;
-    color: #333;
-    font-family:serif;
-    margin: 1em auto 4em auto;
-    position: relative;
-    width: 960px;
-}
-h1{
-  text-align:center;
-  font-size:300%;
-  color:#007;
-}
-</style>
-</head>
+{% extends "structure.html" %}
 
-<body>
+  {% block content %}
+  
   <h1>{{ title }}</h1>
   <hr>
   <aside style="margin-top:100px;">
@@ -137,4 +106,5 @@ h1{
     .on("mouseleave", mouseleave)
 
   </script>
-</body>
+  
+  {% endblock %}

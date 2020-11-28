@@ -6,6 +6,7 @@ import json
 from collections import OrderedDict
 from itertools import islice
 from datetime import datetime
+import numpy as np
 
 from tulip import tlp
 
@@ -134,6 +135,16 @@ def films(acteur="Jean Reno"):
     name = mainGraph.getStringProperty("name")
     viewSelection = mainGraph.getBooleanProperty("viewSelection")
     viewSelection.setAllNodeValue(False)
+    viewMetric = mainGraph.getDoubleProperty("viewMetric")
+    mainGraph.applyDoubleAlgorithm("Degree", viewMetric)
+
+    names = []
+
+    for n in mainGraph.getNodes():
+        if name[n]!="" and viewMetric[n]>1:
+            names.append(name[n])
+    
+    names = np.sort(names)
 
     # Subgraph corresponding to the actor in parameter
     i = 0
@@ -201,7 +212,9 @@ def films(acteur="Jean Reno"):
     return render_template("acteur_films.html",
         title="Les Films de "+acteur,
         acteur=acteur,
-        graph=graph)
+        graph=graph,
+        nodelink=True,
+        names = names)
 
 @app.route("/wordcloud1")
 def wordcloud1():   # first word cloud (csv)
@@ -352,12 +365,14 @@ def predicting_profits():
     vote_average = g.getDoubleProperty("vote_average")
     vote_count = g.getIntegerProperty("vote_count")
 
-    nb_films_post80=0
+    nb_films=0
     for n in g.getNodes():
-        if original_title!="":
-            nb_films_post80=nb_films_post80+1
-    
-    return str(nb_films_post80)
+        if original_title[n]!="" :
+            if popularity[n]>0 and runtime[n]>0 and vote_average[n]>0 and vote_count[n]>0 :
+                nb_films=nb_films+1
+    return str(nb_films)
+
+
 
 @app.route("/nbfilms-scatter")
 def nbfilms_scatter():

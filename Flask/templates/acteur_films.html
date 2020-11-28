@@ -1,26 +1,43 @@
-<!DOCTYPE html>
-<head>
-<meta charset="utf-8">
-<title>{{title}}</title>
-<style>
-.link {
-  stroke: #999;
-  stroke-opacity: 0.6;
-}
-</style>
-<script type="text/javascript" src="https://d3js.org/d3.v6.min.js"></script>
-<script src="https://d3js.org/d3-dispatch.v2.min.js"></script>
-<script src="https://d3js.org/d3-quadtree.v2.min.js"></script>
-<script src="https://d3js.org/d3-timer.v2.min.js"></script>
-<script src="https://d3js.org/d3-force.v2.min.js"></script>
-</head>
-<body style="text-align:center; background-color:#eeeeff">
-  <h1 style="font-family:serif; font-size:400%; color:#007">{{title}}</h1>
+{% extends "structure.html" %}
+
+  {% block content %}
+  
+  <style>
+	.link {
+	  stroke: #999;
+	  stroke-opacity: 0.6;
+	}
+	button {
+	  background:#fff;
+	  color:#007;
+	  font:bold 12px Verdana;
+	  padding:3px;
+	  margin:0 0 0 4px;
+	  transition-duration:0.4s;
+	}
+	button:hover{
+	  cursor:pointer;
+	  box-shadow: 0 3px 4px 0 rgba(0,0,0,0.24), 0 4px 6px 0 rgba(0,0,0,0.19);
+	}
+  </style>
+  <h1>{{title}}</h1>
   <hr>
-  <div style="color:white" id="nodelink" class="svg-container"></div>
+  <div>
+  <button class="bouton" onclick="toggleNames()">Afficher/masquer acteurs secondaires</button>
+  <br>
+  <select style="margin:4px;" name="actors" onchange="location=this.value;">
+	<option value="">Choisissez un autre acteur</option>
+	{% for i in names %}
+		<option value="{{url_for('films', acteur=i)}}">{{i}}</option>
+	{% endfor %}
+  </select>
+  </div>
+  <div id="nodelink" class="svg-container"></div>
   <script>
-    var width = 1200,
+    var width = 960,
         height = 800;
+		
+	var namesVisible = false;
 
     const svg = d3.select("#nodelink").append("svg")
       .attr("width", width)
@@ -62,12 +79,13 @@
       .attr("fill", d => color(d))
 
     node.append("text")
+	  .attr("class", "nodeText")
       .attr("dy", d => -sizeNode(d))
       .attr("text-anchor", "middle")
       .attr("font-family", "serif")
       .attr("font-weight", d => d.name == '{{acteur}}' ? "bold" : "normal")
       .attr("font-size", d => d.name == '{{acteur}}' ? "30px" : "14px")
-      //.text(d => d.degree > 1 ? d.id : '');
+      //.text(d => d.degree > 1 || d.name == '{{acteur}}' ? d.id : '');
       .text(d => d.name == '{{acteur}}' ? d.name : d.original_title);
 
     simulation.on("tick", () => {
@@ -106,6 +124,18 @@
       var s = sizeMin + Math.min(d.degree, sizeMax);
       return d.name == '' ? s/2 : s;
     }
+	
+	function toggleNames () {
+	  var nodeText = svg.selectAll(".nodeText")
+        .data(graph.nodes);
+	  if (namesVisible){
+	    nodeText.text(d => d.name == '{{acteur}}' ? d.name : d.original_title);
+	  }else{
+		nodeText.text(d => d.degree > 1 || d.name == '{{acteur}}' ? d.id : '');      
+	  }
+	  namesVisible = !namesVisible;
+	}
 
   </script>
-</body>
+  
+  {% endblock %}
