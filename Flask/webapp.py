@@ -5,6 +5,7 @@ import csv
 import json
 from collections import OrderedDict
 from itertools import islice
+from datetime import datetime
 
 from tulip import tlp
 
@@ -13,9 +14,35 @@ app = Flask(__name__)
 
 # List of graph files
 root = os.path.realpath(os.path.dirname(__file__))
-marvelURL = os.path.join(root, "static/data/marvel", "marvel.tlpb")
-FRCinemaURL = os.path.join(root, "static/data/movies", "cinema.francophone2.tlpb")
-FRNetworkURL = os.path.join(root, "static/data/movies", "french.actors.network.tlpb")
+marvelURL = r"static\data\marvel\marvel.tlpb"
+FRCinemaURL = r"static\data\movies\cinema.francophone2.tlpb"
+FRNetworkURL = r"static\data\movies\french.actors.network.tlpb"
+
+# Fonctions de traitement de données
+
+def parseYears(dates,annees):
+    
+    deb=2020
+    fin=0
+
+    dateFormatter1="%d/%m/%Y"
+    dateFormatter2="%Y-%m-%d"
+
+    for film in dates:
+        if "/" in dates[film]:
+            dates[film]=datetime.strptime(dates[film],dateFormatter1)
+            annees[film]=str(dates[film])[0:4]
+            annees[film]=int(datetime.strptime(annees[film],"%Y").year)
+            deb=annees[film] if annees[film]<deb else deb
+            fin=annees[film] if annees[film]>fin else fin
+        elif "-" in dates[film]:
+            dates[film]=datetime.strptime(dates[film],dateFormatter2)
+            annees[film]=str(dates[film])[0:4]
+            annees[film]=int(datetime.strptime(annees[film],"%Y").year)
+
+    return(deb,fin,annees)
+
+# Routes
 
 @app.route("/getMarvelData/<int:k>")
 def getMarvelData(k=30, graph=marvelURL):
@@ -50,6 +77,7 @@ def getMarvelData(k=30, graph=marvelURL):
 
 @app.route("/actors-heatmap/<int:k>")
 def actorsHeatmap(k=40):
+    k=40 if k<10 or k>80 else k
 
     g = tlp.loadGraph(FRNetworkURL)
     name = g.getStringProperty("name")
@@ -132,7 +160,7 @@ def films(acteur="Jean Reno"):
     #original_language = g.getStringProperty("original_language")
     original_title = g.getStringProperty("original_title")
     #popularity = g.getDoubleProperty("popularity")
-    #release_date = g.getStringProperty("release_date")
+    release_date = g.getStringProperty("release_date")
     #revenue = g.getDoubleProperty("revenue")
     #runtime = g.getIntegerProperty("runtime")
     #vote_average = g.getDoubleProperty("vote_average")
@@ -184,6 +212,167 @@ def wordcloud1():   # first word cloud (csv)
 def wordcloud2():   # second word cloud (csv)
     return render_template("wordcloud2.html",
         title="The Marvel Universe")
+
+@app.route("/data_movies_nbfilms")
+def data_movies_nbfilms():
+    g = tlp.loadGraph(FRCinemaURL)
+
+    release_date = g.getStringProperty("release_date")
+    original_title = g.getStringProperty("original_title")
+
+    dates={}
+    annees={}
+    
+    for n in g.getNodes():
+        if (original_title[n]!=""):
+            dates[original_title[n]] = release_date[n]
+            annees[original_title[n]] = release_date[n]
+    
+    deb,fin,annees = parseYears(dates,annees)    
+
+    nb_films=[]
+    for a in range(deb,fin):
+        nb=0
+        for film in annees:
+            if annees[film]==a:
+                nb=nb+1
+        nb_films.append(nb)
+    
+    #csv
+    csvdata = io.StringIO()
+    writer = csv.writer(csvdata, delimiter=",")
+
+    writer.writerow(("year", "value"))
+    for n in range(deb,fin):
+       writer.writerow((n,nb_films[n-deb]))
+
+    output = make_response(csvdata.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=data_movies.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
+
+@app.route("/data_movies_budget")
+def data_movies_budget():
+    g = tlp.loadGraph(FRCinemaURL)
+    release_date = g.getStringProperty("release_date")
+    original_title = g.getStringProperty("original_title")
+    budget = g.getIntegerProperty("budget")
+
+    dates={}
+    annees={}
+    budget_films={}
+    
+    for n in g.getNodes():
+        if (original_title[n]!="" and budget[n]>0):
+            dates[original_title[n]] = release_date[n]
+            annees[original_title[n]] = release_date[n]
+            budget_films[original_title[n]] = budget[n]
+    
+    deb,fin,annees = parseYears(dates,annees)    
+
+    budgets_moyens=[]
+    for a in range(deb,fin):
+        budgets_moyens.append([])
+        for film in annees:
+            if annees[film]==a:
+                budgets_moyens[a-deb].append(budget_films[film])
+    
+    for a in range(fin-deb):
+        budgets_moyens[a]=sum(budgets_moyens[a])/len(budgets_moyens[a]) if len(budgets_moyens[a])!=0 else 0
+
+    #csv
+    csvdata = io.StringIO()
+    writer = csv.writer(csvdata, delimiter=",")
+
+    writer.writerow(("year", "value"))
+    for n in range(deb,fin):
+        if(budgets_moyens[n-deb]!=0):
+            writer.writerow((n,budgets_moyens[n-deb]))
+
+    output = make_response(csvdata.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=data_movies_budget.csv"
+    output.headers["Content-type"] = "text/csv"
+    
+    return output
+
+@app.route("/data_movies_runtime")
+def data_movies_runtime():
+    g = tlp.loadGraph(FRCinemaURL)
+    release_date = g.getStringProperty("release_date")
+    original_title = g.getStringProperty("original_title")
+    runtime = g.getIntegerProperty("runtime")
+
+    dates={}
+    annees={}
+    runtime_films={}
+    
+    for n in g.getNodes():
+        if (original_title[n]!="" and runtime[n]>0):
+            dates[original_title[n]] = release_date[n]
+            annees[original_title[n]] = release_date[n]
+            runtime_films[original_title[n]] = runtime[n]
+    
+    deb,fin,annees = parseYears(dates,annees)    
+
+    runtime_moyens=[]
+    for a in range(deb,fin):
+        runtime_moyens.append([])
+        for film in annees:
+            if annees[film]==a:
+                runtime_moyens[a-deb].append(runtime_films[film])
+    
+    for a in range(fin-deb):
+        runtime_moyens[a]=sum(runtime_moyens[a])/len(runtime_moyens[a]) if len(runtime_moyens[a])!=0 else 0
+
+    #csv
+    csvdata = io.StringIO()
+    writer = csv.writer(csvdata, delimiter=",")
+
+    writer.writerow(("year", "value"))
+    for n in range(deb,fin):
+        if(runtime_moyens[n-deb]!=0):
+            writer.writerow((n,runtime_moyens[n-deb]))
+
+    output = make_response(csvdata.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=data_movies_runtime.csv"
+    output.headers["Content-type"] = "text/csv"
+    
+    return output
+
+@app.route("/predicting-profits")
+def predicting_profits():
+    g = tlp.loadGraph(FRCinemaURL)
+
+    budget = g.getIntegerProperty("budget")
+    original_title = g.getStringProperty("original_title")
+    popularity = g.getDoubleProperty("popularity")
+    release_date = g.getStringProperty("release_date")
+    revenue = g.getDoubleProperty("revenue")
+    runtime = g.getIntegerProperty("runtime")
+    vote_average = g.getDoubleProperty("vote_average")
+    vote_count = g.getIntegerProperty("vote_count")
+
+    nb_films_post80=0
+    for n in g.getNodes():
+        if original_title!="":
+            nb_films_post80=nb_films_post80+1
+    
+    return str(nb_films_post80)
+
+@app.route("/nbfilms-scatter")
+def nbfilms_scatter():
+    return render_template("nbfilms-scatter.html",
+        title="Nombre de films par année")
+
+@app.route("/budget-scatter")
+def budget_scatter():
+    return render_template("budget-scatter.html",
+        title="Budget moyen des films par année")
+    
+@app.route("/runtime-scatter")
+def runtime_scatter():
+    return render_template("runtime-scatter.html",
+        title="Durée moyenne des films par année")
 
 @app.route("/")
 def index():
