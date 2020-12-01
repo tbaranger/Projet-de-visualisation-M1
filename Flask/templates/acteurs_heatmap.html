@@ -1,7 +1,7 @@
 {% extends "structure.html" %}
 
   {% block content %}
-  
+
   <h1>{{ title }}</h1>
   <hr>
   <aside style="margin-top:100px;">
@@ -17,7 +17,7 @@
     width = 720 - margin.left - margin.right,
     height = 720 - margin.top - margin.bottom;
 
-  var svg = d3.select("body")
+  var svg = d3.select("main")
   .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
@@ -62,7 +62,7 @@
     .domain([0,7])
 
   // create a tooltip
-  var tooltip = d3.select("body")
+  var tooltip = d3.select("main")
     .append("div")
     .style("opacity", 0)
     .attr("class", "tooltip")
@@ -106,5 +106,5 @@
     .on("mouseleave", mouseleave)
 
   </script>
-  
+
   {% endblock %}
