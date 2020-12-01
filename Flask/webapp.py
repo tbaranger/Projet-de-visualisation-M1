@@ -15,14 +15,19 @@ app = Flask(__name__)
 
 # List of graph files
 root = os.path.realpath(os.path.dirname(__file__))
-marvelURL = r"static\data\marvel\marvel.tlpb"
-FRCinemaURL = r"static\data\movies\cinema.francophone2.tlpb"
-FRNetworkURL = r"static\data\movies\french.actors.network.tlpb"
+marvelURL = os.path.join(root, "static/data/marvel", "marvel.tlpb")
+FRCinemaURL = os.path.join(root, "static/data/movies", "cinema.francophone2.tlpb")
+FRNetworkURL = os.path.join(root, "static/data/movies", "french.actors.network.tlpb")
+
+# Windows
+#marvelURL = r"static\data\marvel\marvel.tlpb"
+#FRCinemaURL = r"static\data\movies\cinema.francophone2.tlpb"
+#FRNetworkURL = r"static\data\movies\french.actors.network.tlpb"
 
 # Fonctions de traitement de données
 
 def parseYears(dates,annees):
-    
+
     deb=2020
     fin=0
 
@@ -143,7 +148,7 @@ def films(acteur="Jean Reno"):
     for n in mainGraph.getNodes():
         if name[n]!="" and viewMetric[n]>1:
             names.append(name[n])
-    
+
     names = np.sort(names)
 
     # Subgraph corresponding to the actor in parameter
@@ -235,13 +240,13 @@ def data_movies_nbfilms():
 
     dates={}
     annees={}
-    
+
     for n in g.getNodes():
         if (original_title[n]!=""):
             dates[original_title[n]] = release_date[n]
             annees[original_title[n]] = release_date[n]
-    
-    deb,fin,annees = parseYears(dates,annees)    
+
+    deb,fin,annees = parseYears(dates,annees)
 
     nb_films=[]
     for a in range(deb,fin):
@@ -250,7 +255,7 @@ def data_movies_nbfilms():
             if annees[film]==a:
                 nb=nb+1
         nb_films.append(nb)
-    
+
     #csv
     csvdata = io.StringIO()
     writer = csv.writer(csvdata, delimiter=",")
@@ -274,14 +279,14 @@ def data_movies_budget():
     dates={}
     annees={}
     budget_films={}
-    
+
     for n in g.getNodes():
         if (original_title[n]!="" and budget[n]>0):
             dates[original_title[n]] = release_date[n]
             annees[original_title[n]] = release_date[n]
             budget_films[original_title[n]] = budget[n]
-    
-    deb,fin,annees = parseYears(dates,annees)    
+
+    deb,fin,annees = parseYears(dates,annees)
 
     budgets_moyens=[]
     for a in range(deb,fin):
@@ -289,7 +294,7 @@ def data_movies_budget():
         for film in annees:
             if annees[film]==a:
                 budgets_moyens[a-deb].append(budget_films[film])
-    
+
     for a in range(fin-deb):
         budgets_moyens[a]=sum(budgets_moyens[a])/len(budgets_moyens[a]) if len(budgets_moyens[a])!=0 else 0
 
@@ -305,7 +310,7 @@ def data_movies_budget():
     output = make_response(csvdata.getvalue())
     output.headers["Content-Disposition"] = "attachment; filename=data_movies_budget.csv"
     output.headers["Content-type"] = "text/csv"
-    
+
     return output
 
 @app.route("/data_movies_runtime")
@@ -318,14 +323,14 @@ def data_movies_runtime():
     dates={}
     annees={}
     runtime_films={}
-    
+
     for n in g.getNodes():
         if (original_title[n]!="" and runtime[n]>0):
             dates[original_title[n]] = release_date[n]
             annees[original_title[n]] = release_date[n]
             runtime_films[original_title[n]] = runtime[n]
-    
-    deb,fin,annees = parseYears(dates,annees)    
+
+    deb,fin,annees = parseYears(dates,annees)
 
     runtime_moyens=[]
     for a in range(deb,fin):
@@ -333,7 +338,7 @@ def data_movies_runtime():
         for film in annees:
             if annees[film]==a:
                 runtime_moyens[a-deb].append(runtime_films[film])
-    
+
     for a in range(fin-deb):
         runtime_moyens[a]=sum(runtime_moyens[a])/len(runtime_moyens[a]) if len(runtime_moyens[a])!=0 else 0
 
@@ -349,7 +354,7 @@ def data_movies_runtime():
     output = make_response(csvdata.getvalue())
     output.headers["Content-Disposition"] = "attachment; filename=data_movies_runtime.csv"
     output.headers["Content-type"] = "text/csv"
-    
+
     return output
 
 @app.route("/predicting-profits")
@@ -372,8 +377,6 @@ def predicting_profits():
                 nb_films=nb_films+1
     return str(nb_films)
 
-
-
 @app.route("/nbfilms-scatter")
 def nbfilms_scatter():
     return render_template("nbfilms-scatter.html",
@@ -383,7 +386,7 @@ def nbfilms_scatter():
 def budget_scatter():
     return render_template("budget-scatter.html",
         title="Budget moyen des films par année")
-    
+
 @app.route("/runtime-scatter")
 def runtime_scatter():
     return render_template("runtime-scatter.html",
