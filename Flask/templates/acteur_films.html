@@ -1,13 +1,14 @@
 {% extends "structure.html" %}
 
   {% block content %}
-  
+
   <style>
 	.link {
 	  stroke: #999;
 	  stroke-opacity: 0.6;
 	}
 	button {
+	  border: 1px solid #000;
 	  background:#fff;
 	  color:#007;
 	  font:bold 12px Verdana;
@@ -36,7 +37,7 @@
   <script>
     var width = 960,
         height = 800;
-		
+
 	var namesVisible = false;
 
     const svg = d3.select("#nodelink").append("svg")
@@ -124,18 +125,18 @@
       var s = sizeMin + Math.min(d.degree, sizeMax);
       return d.name == '' ? s/2 : s;
     }
-	
+
 	function toggleNames () {
 	  var nodeText = svg.selectAll(".nodeText")
         .data(graph.nodes);
 	  if (namesVisible){
 	    nodeText.text(d => d.name == '{{acteur}}' ? d.name : d.original_title);
 	  }else{
-		nodeText.text(d => d.degree > 1 || d.name == '{{acteur}}' ? d.id : '');      
+		nodeText.text(d => d.degree > 1 || d.name == '{{acteur}}' ? d.id : '');
 	  }
 	  namesVisible = !namesVisible;
 	}
 
   </script>
-  
+
   {% endblock %}
