@@ -1,0 +1,133 @@
+{% extends "structure.html" %}
+
+  {% block content %}
+
+  <style>
+	.link {
+	  stroke: #999;
+	  stroke-opacity: 1;
+	}
+	.link2 {
+	  stroke: #000;
+	  stroke-opacity: 0.2;
+	}
+	button {
+	  border: 1px solid #000;
+	  background:#fff;
+	  color:#007;
+	  font:bold 12px Verdana;
+	  padding:3px;
+	  margin:0 0 0 4px;
+	  transition-duration:0.4s;
+	}
+	button:hover{
+	  cursor:pointer;
+	  box-shadow: 0 3px 4px 0 rgba(0,0,0,0.24), 0 4px 6px 0 rgba(0,0,0,0.19);
+	}
+  </style>
+  <h1>{{title}}</h1>
+  <hr>
+  <div id="nodelink1" class="svg-container"></div>
+  <script>
+	var margin = {top: 30, right: 60, bottom: 60, left: 60},
+		width = 960,
+		height = 720 - margin.top - margin.bottom;
+
+    const svg1 = d3.select("#nodelink1").append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .append("g");
+
+    network = {{ network|tojson }};
+	
+	var x = d3.scaleLinear()
+      .domain( d3.extent(network.nodes, d => d.x))
+      .range([ margin.left, width - margin.right ]);
+	  
+	var y = d3.scaleLinear()
+      .domain( d3.extent(network.nodes, d => d.y))
+      .range([ height - margin.bottom, 0 + margin.top ]);
+
+    var link = svg1.append("g").selectAll('.link2')
+      .data(network.links)
+      .enter().append("line")
+        .attr("class", "link2")
+		.attr("x1", d => x(d.source.x))
+        .attr("y1", d => y(d.source.y))
+        .attr("x2", d => x(d.target.x))
+        .attr("y2", d => y(d.target.y));
+
+    var node = svg1.selectAll(".node")
+      .data(network.nodes)
+      .enter().append("g")
+        .attr("class", "node")
+		.attr("transform", d => "translate(" + x(d.x) + "," + y(d.y) + ")" );
+
+    node.append("circle")
+      .attr("r", d => 1)
+      .attr("stroke", "#000")
+      .attr("fill", "#000")
+	
+  </script>
+  <div id="nodelink2" class="svg-container"></div> 
+  <script>
+	var margin = {top: 30, right: 60, bottom: 60, left: 60},
+		width = 960 - margin.left - margin.right,
+		height = 800 - margin.top - margin.bottom;
+
+    const svg2 = d3.select("#nodelink2").append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .append("g");
+
+    graph = {{ graph|tojson }};
+	
+	var x = d3.scaleLinear()
+      .domain( d3.extent(graph.nodes, d => d.x))
+      .range([ margin.left, width - margin.right ]);
+	  
+	var y = d3.scaleLinear()
+      .domain( d3.extent(graph.nodes, d => d.y))
+      .range([ height - margin.bottom, 0 + margin.top ]);
+
+    var link = svg2.append("g").selectAll('.link')
+      .data(graph.links)
+      .enter().append("line")
+        .attr("class", "link")
+		.attr("x1", d => x(d.source.x))
+        .attr("y1", d => y(d.source.y))
+        .attr("x2", d => x(d.target.x))
+        .attr("y2", d => y(d.target.y));
+
+    var node = svg2.selectAll(".node")
+      .data(graph.nodes)
+      .enter().append("g")
+        .attr("class", "node")
+		.attr("transform", d => "translate(" + x(d.x) + "," + y(d.y) + ")" );
+
+    node.append("circle")
+      .attr("r", d => 5)
+      .attr("stroke", "#000")
+      .attr("fill", "#000")
+
+    node.append("text")
+	  .attr("class", "nodeText")
+      .attr("dy", d => -5)
+      .attr("text-anchor", "middle")
+      .attr("font-family", "serif")
+      .attr("font-weight", "normal")
+      .attr("font-size", "8px")
+      .text(d => d.id);
+	  
+	svg.call(d3.zoom()
+      .extent([[0, 0], [width, height]])
+      .scaleExtent([1, 4])
+      .on("zoom", zoomed));
+
+	function zoomed({transform}) {
+	  g.attr("transform", transform);
+	}
+	
+  </script>
+
+  {% endblock %}
