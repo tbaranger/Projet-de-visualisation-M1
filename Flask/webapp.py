@@ -15,14 +15,16 @@ app = Flask(__name__)
 
 # List of graph files
 root = os.path.realpath(os.path.dirname(__file__))
-marvelURL = os.path.join(root, "static/data/marvel", "marvel.tlpb")
-FRCinemaURL = os.path.join(root, "static/data/movies", "cinema.francophone2.tlpb")
-FRNetworkURL = os.path.join(root, "static/data/movies", "french.actors.network.tlpb")
+#marvelURL = os.path.join(root, "static/data/marvel", "marvel.tlpb")
+#FRCinemaURL = os.path.join(root, "static/data/movies", "cinema.francophone2.tlpb")
+#FRNetworkURL = os.path.join(root, "static/data/movies", "french.actors.network.tlpb")
 
 # Windows
-#marvelURL = r"static\data\marvel\marvel.tlpb"
-#FRCinemaURL = r"static\data\movies\cinema.francophone2.tlpb"
-#FRNetworkURL = r"static\data\movies\french.actors.network.tlpb"
+marvelURL = r"static\data\marvel\marvel.tlpb"
+FRCinemaURL = r"static\data\movies\cinema.francophone2.tlpb"
+FRNetworkURL = r"static\data\movies\french.actors.network.tlpb"
+communitiesURL = r"static\data\movies\communities.tlpb"
+mainNetworkURL = r"static\data\movies\french.actors.network.main.tlpb"
 
 # Fonctions de traitement de données
 
@@ -47,6 +49,39 @@ def parseYears(dates,annees):
             annees[film]=int(datetime.strptime(annees[film],"%Y").year)
 
     return(deb,fin,annees)
+
+def convertGraphToD3Static(url):
+    g = tlp.loadGraph(url)
+    name = g.getStringProperty("name")
+    viewLayout = g.getLayoutProperty("viewLayout")
+
+    nodes = []
+    links = []
+
+    for n in g.getNodes():
+        dict = {}
+        dict["id"] = name[n]
+        dict["x"] = viewLayout[n][0]
+        dict["y"] = viewLayout[n][1]
+        nodes.append(dict)
+
+    for e in g.getEdges():
+        dict = {}
+        source = {}
+        target = {}
+        source["x"] = viewLayout[g.source(e)][0]
+        source["y"] = viewLayout[g.source(e)][1]
+        target["x"] = viewLayout[g.target(e)][0]
+        target["y"] = viewLayout[g.target(e)][1]        
+        dict["source"] = source
+        dict["target"] = target        
+        links.append(dict)
+
+    graph = {}
+    graph['links'] = links
+    graph['nodes'] = nodes
+
+    return graph
 
 # Routes
 
@@ -220,6 +255,18 @@ def films(acteur="Jean Reno"):
         graph=graph,
         nodelink=True,
         names = names)
+
+@app.route("/communities")
+def communities():
+
+    # load graph data
+    g1 = convertGraphToD3Static(communitiesURL)
+    g2 = convertGraphToD3Static(mainNetworkURL)
+
+    return render_template("communities.html",
+        title="Communautés du cinéma francophone",
+        graph=g1,
+        network=g2)
 
 @app.route("/wordcloud1")
 def wordcloud1():   # first word cloud (csv)
