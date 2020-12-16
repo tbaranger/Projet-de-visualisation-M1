@@ -18,6 +18,8 @@ root = os.path.realpath(os.path.dirname(__file__))
 #marvelURL = os.path.join(root, "static/data/marvel", "marvel.tlpb")
 #FRCinemaURL = os.path.join(root, "static/data/movies", "cinema.francophone2.tlpb")
 #FRNetworkURL = os.path.join(root, "static/data/movies", "french.actors.network.tlpb")
+#communitiesURL = os.path.join(root, "static/data/movies", "communities.tlpb")
+#mainNetworkURL = os.path.join(root, "static/data/movies", "french.actors.network.main.tlpb")
 
 # Windows
 marvelURL = r"static\data\marvel\marvel.tlpb"
@@ -72,9 +74,9 @@ def convertGraphToD3Static(url):
         source["x"] = viewLayout[g.source(e)][0]
         source["y"] = viewLayout[g.source(e)][1]
         target["x"] = viewLayout[g.target(e)][0]
-        target["y"] = viewLayout[g.target(e)][1]        
+        target["y"] = viewLayout[g.target(e)][1]
         dict["source"] = source
-        dict["target"] = target        
+        dict["target"] = target
         links.append(dict)
 
     graph = {}
@@ -441,7 +443,7 @@ def runtime_scatter():
 
 @app.route("/")
 def index():
-    return redirect(url_for("actorsHeatmap", k=40))
+    return redirect(url_for("films", acteur="François Cluzet"))
 
 if __name__ == "__main__":
    app.run(debug=True)
