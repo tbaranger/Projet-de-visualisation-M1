@@ -62,9 +62,10 @@
     .domain([0,7])
 
   // create a tooltip
-  var tooltip = d3.select("main")
+  var tooltip = d3.select("body")
     .append("div")
     .style("opacity", 0)
+    .style("position", "absolute")
     .attr("class", "tooltip")
     .style("background-color", "white")
     .style("border", "solid")
@@ -74,7 +75,9 @@
 
   var mouseover = function(d) {
     tooltip
-      .style("opacity", 1)
+      .style("opacity", 0.85)
+      .style("pointer-events", "none")
+      .style("word-wrap", "break-word")
     d3.select(this)
       .style("stroke", "black")
       .style("stroke-width", "1px")
@@ -82,8 +85,10 @@
   var mousemove = function(event, d) {
     tooltip
       .html(d.actor1 == d.actor2 ? "Nombre de rencontres entre <b>" + d.actor1 + "</b> et les acteurs/actrices de cette liste : <b>" + d.collaborations + "</b>" : "Nombre de rencontres entre " + "<b>" + d.actor2 + "</b> et <b>" + d.actor1 + "</b>&nbsp;: <b>" + d.collaborations + "</b>")
-      .style("left", (d3.pointer(event)[0]+70) + "px")
-      .style("top", (d3.pointer(event)[1]) + "px")
+      .style("left", (event.pageX - 195) + "px")
+      .style("top", (event.pageY - 25) + "px")
+      //.style("left", (d3.pointer(event)[0]+70) + "px")
+      //.style("top", (d3.pointer(event)[1]) + "px")
   }
   var mouseleave = function(d) {
     tooltip
