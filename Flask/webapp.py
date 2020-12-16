@@ -77,6 +77,8 @@ def convertGraphToD3Static(url):
         target["y"] = viewLayout[g.target(e)][1]
         dict["source"] = source
         dict["target"] = target
+        dict["sourceLabel"] = name[g.source(e)]
+        dict["targetLabel"] = name[g.target(e)]
         links.append(dict)
 
     graph = {}
@@ -260,15 +262,49 @@ def films(acteur="Jean Reno"):
 
 @app.route("/communities")
 def communities():
-
     # load graph data
     g1 = convertGraphToD3Static(communitiesURL)
-    g2 = convertGraphToD3Static(mainNetworkURL)
+    g = tlp.loadGraph(FRCinemaURL)
+
+    actorID = g.getIntegerProperty("actorID")
+    name = g.getStringProperty("name")
+    original_title = g.getStringProperty("original_title")
+    dates = g.getStringProperty("release_date")
+
+    dateFormatter1="%d/%m/%Y"
+    dateFormatter2="%Y-%m-%d"
+
+    for e in g1['links']:
+        actor1 = e["sourceLabel"]
+        actor2 = e["targetLabel"]
+        titles = []
+        for n in name.getNodesEqualTo(actor1):
+            src = n
+        for film in g.getInOutNodes(src):    
+            for tgt in g.getInOutNodes(film):
+                if name[tgt] == actor2:    
+                    if "/" in dates[film]:
+                        year=datetime.strptime(dates[film],dateFormatter1)
+                        year=str(year)[0:4]
+                    elif "-" in dates[film]:
+                        year=datetime.strptime(dates[film],dateFormatter2)
+                        year=str(year)[0:4]
+                    if(len(titles)==0):
+                        titles.append("<br>"+original_title[film]+" ("+year+")")
+                    else:
+                        i=0
+                        while(titles[i][-5:-1]<year and i+1<len(titles)):
+                            i+=1
+                        if titles[i][-5:-1]<year:
+                            titles.append("<br>"+original_title[film]+" ("+year+")")
+                        else:
+                            titles.insert(i,"<br>"+original_title[film]+" ("+year+")")
+        titles[0]=titles[0][4:]
+        e['titles']=titles
 
     return render_template("communities.html",
         title="Communautés du cinéma francophone",
-        graph=g1,
-        network=g2)
+        graph=g1)
 
 @app.route("/wordcloud1")
 def wordcloud1():   # first word cloud (csv)
