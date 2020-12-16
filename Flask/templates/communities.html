@@ -6,7 +6,7 @@
 	.link {
 	  stroke: #fff;
 	  stroke-opacity: 0.5;
-	  stroke-width: 2;
+	  stroke-width: 4;
 	}
 	button {
 	  border: 1px solid #000;
@@ -124,6 +124,42 @@
 	var y = d3.scaleLinear()
       .domain( d3.extent(graph.nodes, d => d.y))
       .range([ height - margin.bottom, 0 + margin.top ]);
+	  
+	var tooltip = d3.select("body")
+		.append("div")
+		.style("opacity", 0)
+		.style("position", "absolute")
+		.attr("class", "tooltip")
+		.style("background-color", "white")
+		.style("border", "solid")
+		.style("border-width", "2px")
+		.style("border-radius", "5px")
+		.style("padding", "5px")
+
+	var mouseover = function(d) {
+		tooltip
+		  .style("opacity", 0.85)
+		  .style("pointer-events", "none")
+		  .style("word-wrap", "break-word")
+		d3.select(this)
+			.style("stroke-opacity", 0.8)
+		  //.style("stroke", "black")
+		  //.style("stroke-width", "1px")
+	}
+	var mousemove = function(event, d) {
+		tooltip
+		  .html(d.titles)
+		  .style("left", (event.pageX + 10) + "px")
+		  .style("top", (event.pageY) + "px")
+		  //.style("left", (d3.pointer(event)[0]+70) + "px")
+		  //.style("top", (d3.pointer(event)[1]) + "px")
+	}
+	var mouseleave = function(d) {
+		tooltip
+		  .style("opacity", 0)
+		d3.select(this)
+		  .style("stroke-opacity", 0.5)
+	}
 
     var link = svg2.append("g").selectAll('.link')
       .data(graph.links)
@@ -132,7 +168,10 @@
 		.attr("x1", d => x(d.source.x))
         .attr("y1", d => y(d.source.y))
         .attr("x2", d => x(d.target.x))
-        .attr("y2", d => y(d.target.y));
+        .attr("y2", d => y(d.target.y))
+	  .on("mouseover", mouseover)
+      .on("mousemove", mousemove)
+      .on("mouseleave", mouseleave);
 
     var node = svg2.selectAll(".node")
       .data(graph.nodes)
