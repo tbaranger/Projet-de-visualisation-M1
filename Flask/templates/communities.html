@@ -96,7 +96,7 @@
 		<figcaption>Figure 11 : Graphe quotient des communautés</figcaption>
 	</figure>
 	<br><br>
-	<p>On voit que le graphe quotient est complet, c'est-à-dire qu'il existe des liens entre toutes les communautés. Ce n'est donc pas surprenant qu'il y est quelques incohérences telles que celle décrite plus haut. Dans la suite, nous allons vous présenter une méthode directe pour identifier des communautés naïves dans le réseau.</p>
+	<p>On voit que le graphe quotient est quasi-complet, c'est-à-dire qu'il existe des liens entre presque toutes les communautés. Ce n'est donc pas surprenant qu'il y ait quelques incohérences telles que celle décrite plus haut. Dans la suite, nous allons vous présenter une méthode directe pour identifier des communautés naïves dans le réseau.</p>
 	<h3>Méthode directe</h3>
 	<p>On peut d'une façon naïve qu'un groupe forme une communauté (dans le sens d'une troupe) dès qu'ils ont joué plus qu'un certain nombre de fois ensemble. Ce choix est arbitraire mais il peut être déterminé par le nombre de troupes souhaité, leurs tailles minimales etc. En l'occurence, on souhaite voir les duos du cinéma francophone en plus des groupes plus importants, donc on ne va pas filtrer selon la taille de la communauté mais plutôt du nombre minimum de films en commun. Pour obtenir le résultat suivant, nous avons simplement filtré le réseau social de départ en ne gardant que les arêtes de poids&nbsp;>&nbsp;5, c'est-à-dire les liens entre acteurs ayant joué au moins 5 fois ensemble.</p>
 	</div>
@@ -116,11 +116,11 @@
       .append("g");
 
     graph = {{ graph|tojson }};
-	
+
 	var x = d3.scaleLinear()
       .domain( d3.extent(graph.nodes, d => d.x))
       .range([ margin.left, width - margin.right ]);
-	  
+
 	var y = d3.scaleLinear()
       .domain( d3.extent(graph.nodes, d => d.y))
       .range([ height - margin.bottom, 0 + margin.top ]);
@@ -156,7 +156,7 @@
       .attr("font-weight", "bold")
       .attr("font-size", "15px")
       .text(d => d.id);
-	
+
   </script>
 
   {% endblock %}
