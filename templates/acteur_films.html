@@ -1,0 +1,144 @@
+{% extends "structure.html" %}
+
+  {% block content %}
+
+  <style>
+	.link {
+	  stroke: #999;
+	  stroke-opacity: 0.6;
+	}
+	button {
+	  border: 1px solid #000;
+	  background:#fff;
+	  color:#007;
+	  font:bold 12px Verdana;
+	  padding:3px;
+	  margin:0 0 0 4px;
+	  transition-duration:0.4s;
+	}
+	button:hover{
+	  cursor:pointer;
+	  box-shadow: 0 3px 4px 0 rgba(0,0,0,0.24), 0 4px 6px 0 rgba(0,0,0,0.19);
+	}
+  </style>
+  <h1>{{title}}</h1>
+  <hr>
+  <div>
+  <button class="bouton" onclick="toggleNames()">Afficher/masquer acteurs secondaires</button>
+  <br>
+  <select style="margin:4px;" name="actors" onchange="location=this.value;">
+	<option value="">Choisissez un autre acteur</option>
+	{% for i in names %}
+		<option value="{{url_for('films', acteur=i)}}">{{i}}</option>
+	{% endfor %}
+  </select>
+  </div>
+  <div id="nodelink" class="svg-container"></div>
+  <script>
+    var width = 960,
+        height = 800;
+
+	var namesVisible = false;
+
+    const svg = d3.select("#nodelink").append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .append("g");
+
+    graph = {{ graph|tojson }};
+
+	console.log(graph)
+
+    const sizeMin = 5;
+    const sizeMax = 15;
+
+    const simulation = d3.forceSimulation(graph.nodes)
+      .force("link",d3.forceLink(graph.links).id(d => d.id))
+      .force("charge", d3.forceManyBody()
+        .strength(d => d.name == '{{acteur}}' ? -40*d.degree : -20*d.degree)
+        .distanceMax(Math.min(width/4, height/4))
+      )
+      .force("center", d3.forceCenter(width / 2, height / 2));
+
+    const link = svg.append("g").selectAll('.link')
+      .data(graph.links)
+      .enter().append("line")
+        .attr("class", "link");
+
+    var node = svg.selectAll(".node")
+      .data(graph.nodes)
+      .enter().append("g")
+        .attr("class", "node")
+        .call(d3.drag()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended)
+        );
+
+
+    node.append("circle")
+      .attr("r", d => sizeNode(d))
+      .attr("stroke", "#fff")
+      .attr("fill", d => color(d))
+
+    node.append("text")
+	  .attr("class", "nodeText")
+      .attr("dy", d => -sizeNode(d))
+      .attr("text-anchor", "middle")
+      .attr("font-family", "serif")
+      .attr("font-weight", d => d.name == '{{acteur}}' ? "bold" : "normal")
+      .attr("font-size", d => d.name == '{{acteur}}' ? "30px" : "14px")
+      //.text(d => d.degree > 1 || d.name == '{{acteur}}' ? d.id : '');
+      .text(d => d.name == '{{acteur}}' ? d.name : d.original_title);
+
+    simulation.on("tick", () => {
+      link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+      node
+        .attr("transform", d => "translate(" + d.x + "," + d.y + ")" );
+    });
+
+    function dragstarted(event, d) {
+      if (!event.active) simulation.alphaTarget(0.3).restart();
+      d.fx = d.x;
+      d.fy = d.y;
+    }
+
+    function dragged(event, d) {
+      d.fx = event.x;
+      d.fy = event.y;
+    }
+
+    function dragended(event, d) {
+      if (!event.active) simulation.alphaTarget(0);
+      d.fx = null;
+      d.fy = null;
+    }
+
+    function color (d) {
+      return d.name == '' ? "#443a31" : "#009de0";
+    }
+
+    function sizeNode (d) {
+      var s = sizeMin + Math.min(d.degree, sizeMax);
+      return d.name == '' ? s/2 : s;
+    }
+
+	function toggleNames () {
+	  var nodeText = svg.selectAll(".nodeText")
+        .data(graph.nodes);
+	  if (namesVisible){
+	    nodeText.text(d => d.name == '{{acteur}}' ? d.name : d.original_title);
+	  }else{
+		nodeText.text(d => d.degree > 1 || d.name == '{{acteur}}' ? d.id : '');
+	  }
+	  namesVisible = !namesVisible;
+	}
+
+  </script>
+
+  {% endblock %}

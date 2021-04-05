@@ -1,0 +1,41 @@
+p {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+}
+aside {
+    font-size: small;
+    right: 0;
+    position: absolute;
+    width: 180px;
+}
+
+main {
+    margin: 1em auto 4em auto;
+    position: relative;
+    width: 960px;
+}
+body {
+	background: #eef;
+    color: #333;
+    font-family:serif;
+}
+h1{
+  text-align:center;
+  font-size:300%;
+  color:#007;
+}
+.link {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+button {
+	border-radius:5px;
+	background: #eef;
+	border:2px;
+	color:#007;
+	font:bold 12px Verdana;
+	padding:1px;
+}

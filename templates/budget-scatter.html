@@ -1,0 +1,85 @@
+{% extends "structure.html" %}
+
+  {% block content %}
+
+  <h1>{{ title }}</h1>
+  <hr>
+  <aside style="margin-top:30px;">
+    <h2 style="text-align:center;">{{title}}</h2>
+    <p>Voici un graphique sur lequel nous pouvons observer le budget moyen des films par année. On a conservé seulement les films pour lesquels le budget était non nul. Il est probable que le budget soit renseigné uniquement pour les films à gros budget, ce qui biaiserait nos résultats.</p>
+  </aside>
+  <script>
+
+  var margin = {top: 30, right: 60, bottom: 30, left: 120},
+    width = 780 - margin.left - margin.right,
+    height = 720 - margin.top - margin.bottom;
+
+  var svg = d3.select("main")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+  d3.csv("{{url_for('data_movies_budget')}}").then(function(data) {
+    data.forEach(d => {
+		d.year = d3.timeParse("%Y")(d.year);
+		d.value = +d.value;
+	});
+	var max = d3.max(data, d => d.value);
+    var x = d3.scaleTime()
+      .domain(d3.extent(data, d => d.year))
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+    var y = d3.scaleLinear()
+      .domain([0,max])
+      .range([ height, 0 ]);
+    svg.append("g")
+      .call(d3.axisLeft(y));
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "#999")
+      .attr("stroke-width", 1)
+      .attr("d", d3.line()
+        .x(d => x(d.year))
+        .y(d => y(d.value))
+        )
+    svg
+      .append("g")
+      .selectAll("dot")
+      .data(data)
+      .enter()
+      .append("circle")
+        .attr("cx", d => x(d.year))
+        .attr("cy", d => y(d.value))
+        .attr("r", 3)
+        .attr("fill", "#007")
+		.on("mouseover", function(d) {Tooltip.style("opacity", 1)})
+        .on("mousemove", function(event, d) {
+        Tooltip
+          .html("Le budget moyen des films pour l'année <b>" + d.year.getFullYear() + "</b> est de <b>" + d3.format(",.0r")(d.value) +" $</b>.")
+          .style("left", (d3.pointer(event)[0]+70) + "px")
+          .style("top", (d3.pointer(event)[1]) + "px")
+      })
+        .on("mouseleave", function(d) {
+        Tooltip
+          .style("opacity", 0)
+      })
+
+	var Tooltip = d3.select("main")
+      .append("div")
+      .style("opacity", 0)
+      .attr("class", "tooltip")
+      .style("background-color", "white")
+      .style("border", "solid")
+      .style("border-width", "2px")
+      .style("border-radius", "5px")
+      .style("padding", "5px")
+  })
+  </script>
+
+  {% endblock %}
