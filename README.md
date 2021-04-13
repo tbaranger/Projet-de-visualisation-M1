@@ -43,8 +43,6 @@ Cette page est l'occasion d'aborder le sujet des communautés dans un réseau so
 
 À priori, si la machine sur laquelle on se trouve utilise les mêmes normes que Linux pour les chemins de fichier, il ne devrait pas y avoir besoin de modifier les routes dans le fichier webapp.py. En revanche, sous Windows, il est possible qu'elles doivent être modifiées "à la main" dans le fichier webapp.py.
 
-S'il y avait un vrai problème pour lancer le programme, la version la plus récente de l'application est accessible à l'adresse suivante&nbsp;: https://tbaranger.pythonanywhere.com/.
-
 #### Ce que nous avons fait
 
 Nous avons développé deux visualisations. La première est un **graphe nœud-lien à force**. Il nous permet de visualiser l'ensemble des films dans lequel un acteur a joués, ainsi que les autres acteurs ayant joué dans ces films. Par soucis de visibilité, nous affichons le nom de l'acteur principal en grand, ainsi que le titre des films dans lesquels il figure. On ne peut pas lire le nom des autres acteurs directement sur ce graphe.
